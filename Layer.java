@@ -25,7 +25,7 @@ public class Layer {
   }
 
   public Layer save(String filename) {
-    //Get the file type
+    // Get the file type
     var ending = filename.substring(filename.length() - 3);
     try {
       ImageIO.write(this.image, ending, new File(filename));
@@ -358,86 +358,78 @@ public class Layer {
 
         float value = Math.max(0, Math.min(1, fun.run(hsv[2])));
 
-
         this.image.setRGB(w, h, new Color(value, value, value).getRGB());
       }
     }
     return this;
   }
 
-  public Layer bitSlice(int power){
+  public Layer bitSlice(int power) {
 
     BufferedImage b = new BufferedImage(this.image.getWidth(), this.image.getHeight(), this.image.getType());
     for (var h = 0; h < b.getHeight(); h++) {
       for (var w = 0; w < b.getWidth(); w++) {
-        //Assume we are in grayscale
+        // Assume we are in grayscale
         var pixelInt = this.image.getRGB(w, h);
         int value = new Color(pixelInt).getRed();
-        int slicer = (int)Math.pow(2, power);
+        int slicer = (int) Math.pow(2, power);
         int sliced = value & slicer;
         Color finalColor = null;
-        if(sliced > 0){
+        if (sliced > 0) {
           finalColor = Color.WHITE;
-        }
-        else{
+        } else {
           finalColor = Color.BLACK;
         }
 
         b.setRGB(w, h, finalColor.getRGB());
 
-
       }
     }
 
-
-
-
     Layer toReturn = new Layer(b);
     return toReturn;
-    
-  }
-  public Layer bitSlice(int powerLow, int powerHigh){
-    if(powerLow == powerHigh) return this.bitSlice(powerLow);
 
+  }
+
+  public Layer bitSlice(int powerLow, int powerHigh) {
+    if (powerLow == powerHigh)
+      return this.bitSlice(powerLow);
 
     BufferedImage b = new BufferedImage(this.image.getWidth(), this.image.getHeight(), this.image.getType());
     for (var h = 0; h < b.getHeight(); h++) {
       for (var w = 0; w < b.getWidth(); w++) {
-        //Assume we are in grayscale
+        // Assume we are in grayscale
         var pixelInt = this.image.getRGB(w, h);
         int value = new Color(pixelInt).getRed();
         int slicer = 0;
-        for(int i = powerLow; i <= powerHigh; i++){
-          slicer |= (int)Math.pow(2, i);
+        for (int i = powerLow; i <= powerHigh; i++) {
+          slicer |= (int) Math.pow(2, i);
 
         }
         int sliced = value & slicer;
-        sliced <<=7-powerHigh;
+        sliced <<= 7 - powerHigh;
         Color finalColor = new Color(sliced, sliced, sliced);
-        
 
         b.setRGB(w, h, finalColor.getRGB());
-
 
       }
     }
 
-
-
-
     Layer toReturn = new Layer(b);
     return toReturn;
-    
+
   }
 
   public boolean compareTo(Layer otherImage) {
-    //return false;
-    if(this.getWidth() != otherImage.getWidth() || this.getHeight() != otherImage.getHeight()) return false;
-    for(int y  = 0; y < getHeight(); y++){
-      for(int x = 0; x < getWidth(); x++){
-        Color thisColor = this.getColorAt(x,y);
-        Color otherColor = otherImage.getColorAt(x,y);
-        if(Helper.sameColor(thisColor, otherColor)) continue;
+    // return false;
+    if (this.getWidth() != otherImage.getWidth() || this.getHeight() != otherImage.getHeight())
+      return false;
+    for (int y = 0; y < getHeight(); y++) {
+      for (int x = 0; x < getWidth(); x++) {
+        Color thisColor = this.getColorAt(x, y);
+        Color otherColor = otherImage.getColorAt(x, y);
+        if (Helper.sameColor(thisColor, otherColor))
+          continue;
         return false;
       }
     }
@@ -445,7 +437,7 @@ public class Layer {
   }
 
   private Color getColorAt(int x, int y) {
-    return new Color(image.getRGB(x,y));
+    return new Color(image.getRGB(x, y));
   }
 
   private int getHeight() {
@@ -454,6 +446,30 @@ public class Layer {
 
   private int getWidth() {
     return image.getWidth();
+  }
+
+  public Layer ditherBW() {
+    BufferedImage b = new BufferedImage(this.image.getWidth(), this.image.getHeight(), this.image.getType());
+
+    for (var h = 0; h < b.getHeight(); h++) {
+      for (var w = 0; w < b.getWidth(); w++) {
+        // Assume we are in grayscale
+        var pixelInt = this.image.getRGB(w, h);
+        int value = new Color(pixelInt).getRed();
+
+        Color finalColor = null;
+        finalColor = new Color(value, value, value);
+        if (value > 128)
+          finalColor = Color.WHITE;
+        else
+          finalColor = Color.BLACK;
+
+        b.setRGB(w, h, finalColor.getRGB());
+
+      }
+    }
+    Layer toReturn = new Layer(b);
+    return toReturn;
   }
 
 }

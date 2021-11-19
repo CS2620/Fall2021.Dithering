@@ -15,9 +15,18 @@ public class Main {
         // doBitSlicing();
         // doBrightening();
         // doApplyCurve();
-        doCustomFormat("horse", "png");
-        doCalculateCompressionRatio("horse", "custom");
+        //doCustomFormat("horse", "png");
+        //doCalculateCompressionRatio("horse", "custom");
+        dither("horse", "png");
         
+    }
+
+    private void dither(String filename, String extension) {
+        var start = new Processor("./in/" + filename + "." + extension).grayscale();
+        start.addLayer(image -> image.ditherBW());
+            
+
+        start.saveCurrentLayer("./out/dithered-" + filename + "." + extension);
     }
 
     private static String[] fileFormats = null;
