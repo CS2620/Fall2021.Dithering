@@ -450,19 +450,25 @@ public class Layer {
 
   public Layer ditherBW() {
     BufferedImage b = new BufferedImage(this.image.getWidth(), this.image.getHeight(), this.image.getType());
+    int[][] errors = new int[this.image.getWidth()][this.image.getHeight()];
 
     for (var h = 0; h < b.getHeight(); h++) {
+      int error = 0;
       for (var w = 0; w < b.getWidth(); w++) {
         // Assume we are in grayscale
         var pixelInt = this.image.getRGB(w, h);
         int value = new Color(pixelInt).getRed();
+        int temp = value;
 
         Color finalColor = null;
-        finalColor = new Color(value, value, value);
-        if (value > 128)
+        temp += error;
+        if (temp > 128)
           finalColor = Color.WHITE;
         else
           finalColor = Color.BLACK;
+
+        error = temp - finalColor.getRed();
+        ;
 
         b.setRGB(w, h, finalColor.getRGB());
 
@@ -470,6 +476,58 @@ public class Layer {
     }
     Layer toReturn = new Layer(b);
     return toReturn;
+  }
+
+  public Layer ditherBWFloyd() {
+    BufferedImage b = new BufferedImage(this.image.getWidth(), this.image.getHeight(), this.image.getType());
+    int[][] errors = new int[this.image.getWidth()][this.image.getHeight()];
+
+    for (var h = 0; h < b.getHeight(); h++) {
+      // int error = 0;
+      for (var w = 0; w < b.getWidth(); w++) {
+        // Assume we are in grayscale
+        var pixelInt = this.image.getRGB(w, h);
+        int value = new Color(pixelInt).getRed();
+        int temp = value;
+
+        Color finalColor = null;
+        temp += errors[w][h];
+        if (temp > 128)
+          finalColor = Color.WHITE;
+        else
+          finalColor = Color.BLACK;
+
+        int error = temp - finalColor.getRed();
+        ;
+        propagateError(error, w, h, errors);
+
+        b.setRGB(w, h, finalColor.getRGB());
+
+      }
+    }
+    Layer toReturn = new Layer(b);
+    return toReturn;
+  }
+
+  private void propagateError(int error, int x, int y, int[][] errors) {
+    int xn1 = x - 1;
+    int x1 = x + 1;
+    int y1 = y + 1;
+    if (x1 < errors.length) {
+      errors[x1][y] += (int) (7 / 16.0 * error + .5);
+    }
+    if (y1 < errors[0].length) {
+      if (x1 < errors.length) {
+        errors[x1][y1] += (int) (1 / 16.0 * error + .5);
+      }
+
+      errors[x][y1] += (int) (5 / 16.0 * error + .5);
+
+      if (xn1 > 0) {
+        errors[xn1][y1] += (int) (3 / 16.0 * error + .5);
+      }
+    }
+
   }
 
 }
