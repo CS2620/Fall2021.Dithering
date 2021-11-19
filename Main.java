@@ -10,23 +10,54 @@ public class Main {
     }
 
     public Main(){
-        //doListFormats();
-        // doTestFileFormats();
-        // doBitSlicing();
-        // doBrightening();
-        // doApplyCurve();
-        //doCustomFormat("horse", "png");
-        //doCalculateCompressionRatio("horse", "custom");
+        
+        System.out.println("Normal Dithering");
         dither("horse", "png");
+        dither("mars-moon-phobos", "jpg");
+        dither("rotovirus", "jpg");
+        dither("square", "png");
+
+        System.out.println("Floyd-Steinberg Dithering");
+        ditherF("horse", "png");
+        ditherF("mars-moon-phobos", "jpg");
+        ditherF("rotovirus", "jpg");
+        ditherF("square", "png");
         
     }
 
     private void dither(String filename, String extension) {
+        //Create the dithered image
         var start = new Processor("./in/" + filename + "." + extension).grayscale();
         start.addLayer(image -> image.ditherBW());
-            
+        start.saveCurrentLayer("./out/dithered-" + filename + ".png");
 
-        start.saveCurrentLayer("./out/dithered-" + filename + "." + extension);
+        //Create grayscale version
+        start = new Processor("./in/" + filename + "." + extension).grayscale();
+        start.saveCurrentLayer("./out/grayscale-" + filename + ".png");
+
+        //Compare the file sizes
+        var ditherSize = new File("./out/dithered-" + filename + ".png").length();
+        var grayscaleSize = new File("./out/grayscale-" + filename + ".png").length();
+        System.out.println(filename + ": " + (ditherSize/(double)grayscaleSize) + " compression ratio.");
+
+        
+    }
+    private void ditherF(String filename, String extension) {
+        //Create the dithered image
+        var start = new Processor("./in/" + filename + "." + extension).grayscale();
+        start.addLayer(image -> image.ditherBWFloyd());
+        start.saveCurrentLayer("./out/ditheredF-" + filename + ".png");
+
+        //Create grayscale version
+        start = new Processor("./in/" + filename + "." + extension).grayscale();
+        start.saveCurrentLayer("./out/grayscale-" + filename + ".png");
+
+        //Compare the file sizes
+        var ditherSize = new File("./out/ditheredF-" + filename + ".png").length();
+        var grayscaleSize = new File("./out/grayscale-" + filename + ".png").length();
+        System.out.println(filename + ": " + (ditherSize/(double)grayscaleSize) + " compression ratio.");
+
+        
     }
 
     private static String[] fileFormats = null;

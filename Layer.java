@@ -450,19 +450,20 @@ public class Layer {
 
   public Layer ditherBW() {
     BufferedImage b = new BufferedImage(this.image.getWidth(), this.image.getHeight(), this.image.getType());
-
+    
     for (var h = 0; h < b.getHeight(); h++) {
       for (var w = 0; w < b.getWidth(); w++) {
         // Assume we are in grayscale
         var pixelInt = this.image.getRGB(w, h);
         int value = new Color(pixelInt).getRed();
-
+        
         Color finalColor = null;
-        finalColor = new Color(value, value, value);
         if (value > 128)
           finalColor = Color.WHITE;
         else
           finalColor = Color.BLACK;
+
+        
 
         b.setRGB(w, h, finalColor.getRGB());
 
@@ -471,5 +472,32 @@ public class Layer {
     Layer toReturn = new Layer(b);
     return toReturn;
   }
+
+  public Layer ditherBWFloyd() {
+    BufferedImage b = new BufferedImage(this.image.getWidth(), this.image.getHeight(), this.image.getType());
+    
+    for (var h = 0; h < b.getHeight(); h++) {
+      for (var w = 0; w < b.getWidth(); w++) {
+        // Assume we are in grayscale
+        var pixelInt = this.image.getRGB(w, h);
+        int value = new Color(pixelInt).getRed();
+        
+        Color finalColor = null;
+        if (value > 128)
+          finalColor = Color.WHITE;
+        else
+          finalColor = Color.BLACK;
+
+        
+
+        b.setRGB(w, h, finalColor.getRGB());
+
+      }
+    }
+    Layer toReturn = new Layer(b);
+    return toReturn;
+  }
+
+  
 
 }
